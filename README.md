@@ -29,6 +29,3 @@ Watch the full demo here: [[YouTube Link]](https://youtu.be/TNvFyeE1ILY)
 - Finance tracking and bill alerts.  
 - Deeper task manager integrations.  
 
----
-
-### 📂 Repo Structure
