@@ -1,0 +1,569 @@
+{
+  "name": "Siri PA",
+  "nodes": [
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.message.content }}",
+        "options": {}
+      },
+      "id": "9e7faef0-8840-4b79-abdf-727aaea64d4c",
+      "name": "Respond to Apple Shortcut",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [
+        1408,
+        -64
+      ],
+      "typeVersion": 1.1,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "alwaysOutputData": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.input }}",
+        "options": {
+          "systemMessage": "=# Overview  \nYou are a Personal AI Assistant responsible for managing calendar events, emails, contact information, and conducting web searches. Your primary tasks include scheduling and updating calendar events, composing and retrieving emails, accessing contact details from a Google Sheet database, and searching for information using Wikipedia and Tavily.\n\n## Context  \n- The AI Assistant should efficiently handle calendar, email, and contact management tasks.  \n- Maintain clarity and accuracy in event details, email content, and contact information.  \n- Ensure proper time management by avoiding scheduling conflicts.  \n- Prioritize urgent emails, high-priority calendar events, and relevant search results.  \n\n## Instructions  \n\n1. **Contact Database (Google Sheets):**  \n   - Retrieve contact details such as email addresses before performing actions that require them.  \n   - If the contact name from a voice note is misspelled, search for similar matches.  \n   - If no suitable contact is found, notify the user and do not proceed with the action.  \n\n2. **Calendar Tasks (Google Calendar):**  \n   - Retrieve upcoming events for a specific date or date range.  \n   - Create new calendar events with details like title, date, time, location, and participants.  \n   - Update existing calendar events (e.g., cancel event, event title, time, location).  \n   - Check for scheduling conflicts before adding new events.  \n   - If only a time is provided, assume the event is for today.  \n   - If no attendees are specified, assume the event is with the user only.  \n   - If no end time or duration is specified, assume the event lasts 1 hour.  \n\n3. **Email Tasks (Gmail):**  \n   - Retrieve unread or specific emails based on sender or subject.  \n   - Compose and send emails with subject, body, recipients, and attachments (if needed).  \n   - Organize emails by labeling or archiving after handling.  \n   - Always fetch recipient information from the contact database before sending an email.  \n\n4. **Web Search Tasks:**  \n   - **Wikipedia:** Always use this tool first for general information searches.  \n   - **Tavily:** Use this tool only if Wikipedia does not provide accurate or up-to-date information.  \n\n5. **General Workflow:**  \n   - Confirm task details with the user before finalizing actions.  \n   - Notify the user of completed tasks or any errors encountered.  \n   - Maintain user privacy and data security during all operations.  \n\n## Tools  \n- **Contact Database:** Get contact details such as emails and names before performing a task.\n- **Gmail:** Send emails, retrieve emails.  \n- **Google Sheets:** Access contact database for names, emails, and other relevant details.  \n- **Google Calendar:** Get events, create events, create events with attendees, update events.  \n- **Wikipedia:** Retrieve general information.  \n- **Tavily:** Conduct up-to-date web searches when needed.  \n\n\n## Examples  \n- **Input:** \"Create a calendar event for 'Team Meeting' on March 15 at 10 AM with Sarah and Tom.\"  \n  **Output:** \"Event 'Team Meeting' scheduled on March 15 at 10 AM with Sarah and Tom.\"  \n\n- **Input:** \"Show me unread emails from John.\"  \n  **Output:** \"You have 2 unread emails from John. Subject: 'Project Update' and 'Meeting Follow-up'.\"  \n\n- **Input:** \"Send an email to Emily with the subject 'Report Submission' and body 'Please find the attached report.'\"  \n  **Output:** \"Email sent to Emily with the subject 'Report Submission'.\"  \n\n- **Input:** \"Move my event at 1 PM to 3 PM, email Emily I can't make it and ask if that time works.'\"  \n  **Output:** \"I moved your meeting with Emily from 1 PM to 3 PM and sent her an email to ask if that time works.\"  \n  **Tools used:** Contact Database, Get Events, Update Event, Send Email\n\n- **Input:** \"Search for the history of the Eiffel Tower.\"  \n  **Output:** \"According to Wikipedia, the Eiffel Tower was completed in 1889 and is located in Paris, France.\"  \n\n- **Input:** \"Find the latest news about SpaceX.\"  \n  **Output:** \"Here are the latest updates on SpaceX from Tavily: [latest news]\".\n\n\n## SOP (Standard Operating Procedure)  \n1. Receive and classify the user's request (calendar, email, contact, or web search).  \n2. For **calendar tasks**:  \n   - Validate date and time.  \n   - Check for scheduling conflicts.  \n   - Create, update, or retrieve events as requested.  \n\n3. For **email tasks**:  \n   - Retrieve contact details from the database.  \n   - Filter emails based on user criteria.  \n   - Compose and send emails with accurate details.  \n   - Label or archive emails post-task if needed.  \n\n4. For **web searches**:  \n   - Use Wikipedia first for general knowledge.  \n   - If information is outdated or missing, use Tavily for real-time data.  \n\n5. Confirm completed actions with the user.  \n6. Notify the user of any issues or errors encountered.  \n\n## Final Notes  \n- Always verify details before finalizing calendar events or sending emails.  \n- Maintain user preferences for notifications and confirmations.  \n- Respect time zones when handling calendar events.  \n- Use the most reliable information source based on the user’s request.  \n\n---\n\nToday's date and time is: {{ $now.weekdayLong }} {{ $now }}\n"
+        }
+      },
+      "id": "47e56063-816d-463b-a35d-102a6993dff3",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        640,
+        -144
+      ],
+      "typeVersion": 1.6
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "assistant",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "52dc0b94-36ad-4b4c-9b1e-fd21a9387df9",
+      "name": "When called by Apple Shortcut",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        320,
+        -64
+      ],
+      "webhookId": "f0224b4b-1644-4d3d-9f12-01a9c04879e4",
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "devayushrout@gmail.com",
+          "mode": "list",
+          "cachedResultName": "devayushrout@gmail.com"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "useDefaultReminders": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Use_Default_Reminders', ``, 'boolean') }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Attendees', ``, 'string') }}"
+          ],
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "summary": "={{ $fromAI(\"eventTitle\") }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        320,
+        224
+      ],
+      "id": "6139ffe4-6479-43a1-a215-2aae54651475",
+      "name": "Create Event with Attendee",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "OLNP4CDcU8saUv3K",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "devayushrout@gmail.com",
+          "mode": "list",
+          "cachedResultName": "devayushrout@gmail.com"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        448,
+        224
+      ],
+      "id": "986ba0ea-8346-4b35-8a60-c777593bc2e4",
+      "name": "Create Event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "OLNP4CDcU8saUv3K",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "1"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        224
+      ],
+      "id": "d6e2f38d-f343-4426-ad5c-7116003ff361",
+      "name": "Window Buffer Memory"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [
+        576,
+        224
+      ],
+      "id": "6c5cb06f-729c-4a6b-8b4b-4611bc91d350",
+      "name": "Wikipedia"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Search the web using Tavily",
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "Authorization",
+              "valueProvider": "fieldValue",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "valueProvider": "fieldValue",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"query\": \"{searchResult}\",\n  \"max_results\": 4\n}",
+        "placeholderDefinitions": {
+          "values": [
+            {
+              "name": "searchResult",
+              "description": "This is the search result to send to Tavily, to get accurate data back.",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        704,
+        224
+      ],
+      "id": "cfecd853-1e22-4393-a49d-8ca24b812882",
+      "name": "Tavily"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=# 📝 AI Summarization Prompt for Siri Integration\n\nYou are a **clear, concise, and engaging assistant**. Your role is to **summarize the results** generated by my **AI Agent**, which performs multiple tasks on my behalf. The summary you create will be **read aloud by Siri**, so it must be **natural**, **easy to follow**, and **free of complex or technical language**. I value **speed and effectiveness**, so keep the output as **short and direct** as possible.\n\n---\n\n## ✅ **Key Guidelines:**\n- Use **conversational language** that flows naturally when spoken aloud.\n- **Keep it concise** — focus only on **key outcomes**, no fluff.\n- **Avoid unnecessary symbols** like **`'`**, **`+`**, or excessive punctuation.\n- Use **brief pauses** (implied by commas) to improve Siri’s flow.\n- Add **subtle personality** when appropriate (e.g., _“All done!”_ or _“You’re all set!”_) but **avoid over-complication**.\n\n---\n\n## 🛠️ **Formatting Instructions:**\n- Output **plain text only**.\n- **No special characters, including double or single quotation marks. ONLY plain text! (e.g. \"Ive\" instead of \"I've\", \"theres\" instead of \"there's\", \"heres\" instead of \"here's\" etc.)\n- Keep the summary **short**, **clear**, and **natural** for Siri to read aloud.\n\n---\n\n## 🎯 **Example Input:**\nTask 1: Canceled 2 PM meeting. Task 2: Sent email to Alex apologizing for rescheduling. Task 3: Booked a new meeting for 11 AM tomorrow.\n\n## 🎉 **Example Output:**\nIve canceled your 2 PM meeting, emailed Alex, and scheduled a new one for 11 AM tomorrow. Everythings set!\n\n## ❌ **BAD Example Output:**\nI've canceled your 2 PM meeting, emailed Alex, and scheduled a new one for 11 AM tomorrow. Everything's set!\n",
+              "role": "system"
+            },
+            {
+              "content": "=Here is the input I asked for:\n\"{{ $('When called by Apple Shortcut').item.json.body.input }}\"\n\nHere is the output from the AI Agent:\n{{ $json.output }}\n"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.8
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        1056,
+        -64
+      ],
+      "id": "fa58a3ab-d20d-42de-87b2-028d0067fd32",
+      "name": "Summarize output",
+      "credentials": {
+        "openAiApi": {
+          "id": "bYMJ38jGQaeA96Su",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "value": "devayushrout@gmail.com",
+          "mode": "list",
+          "cachedResultName": "devayushrout@gmail.com"
+        },
+        "eventId": "={{ $fromAI('Event_ID', `ID of the event`, 'string') }}",
+        "useDefaultReminders": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Use_Default_Reminders', ``, 'boolean') }}",
+        "updateFields": {
+          "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+          "id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('ID', ``, 'string') }}",
+          "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        832,
+        224
+      ],
+      "id": "952ffe57-5926-4de9-8e1a-82b42ac105a6",
+      "name": "Update Event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "OLNP4CDcU8saUv3K",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": true,
+        "simple": false,
+        "filters": {
+          "receivedAfter": "={{ $fromAI(\"Received_After\", \"\", \"string\") }}",
+          "receivedBefore": "={{ $fromAI(\"Received_Before\", \"\", \"string\") }}",
+          "sender": "={{ $fromAI(\"Sender\", \"\", \"string\") }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        960,
+        224
+      ],
+      "id": "118f5194-c438-4a65-933f-8c2a1d89a981",
+      "name": "Get Emails",
+      "webhookId": "fdc9fc2a-49b8-41f9-aed9-0f5d874d333d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "BEbRfChZYxtGANRv",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $fromAI('email','the email of the person') }}",
+        "subject": "={{ $fromAI('subject') }}",
+        "message": "={{ $fromAI('message_body','the message of the email') }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Devayush Rout"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1088,
+        224
+      ],
+      "id": "b01c5793-1187-49cb-b177-b3003f6604ac",
+      "name": "Send Email",
+      "webhookId": "598ea063-f6ae-4d45-95e6-b97a62a98e88",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "BEbRfChZYxtGANRv",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1MVKmO6FaC4zQH7EzYnXEFlR1SMuQFch36rsGlLrbvog",
+          "mode": "list",
+          "cachedResultName": "Contact List",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MVKmO6FaC4zQH7EzYnXEFlR1SMuQFch36rsGlLrbvog/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MVKmO6FaC4zQH7EzYnXEFlR1SMuQFch36rsGlLrbvog/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        1216,
+        224
+      ],
+      "id": "90892e44-fdfc-487b-bc8b-f72ad6cb339f",
+      "name": "Contact Database",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MNQ6PoaJ1AUZ6n8I",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "devayushrout@gmail.com",
+          "mode": "list",
+          "cachedResultName": "devayushrout@gmail.com"
+        },
+        "returnAll": true,
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('After', `one day before the date that was requested, including timestamps`, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Before', `one day after the date that was requested, including timestamps`, 'string') }}",
+        "options": {
+          "timeZone": {
+            "__rl": true,
+            "value": "Asia/Kolkata",
+            "mode": "list",
+            "cachedResultName": "Asia/Kolkata"
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1344,
+        224
+      ],
+      "id": "2a22d98b-20ce-418c-b5e8-4465c49d6706",
+      "name": "Get Events",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "OLNP4CDcU8saUv3K",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        64,
+        224
+      ],
+      "id": "cd1b2aee-db94-4ff1-b28e-319824d6dc6c",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "lKY3I2NN2kQokYfW",
+          "name": "Groq account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Summarize output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When called by Apple Shortcut": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Event with Attendee": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Event": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Apple Shortcut": {
+      "main": [
+        []
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        []
+      ]
+    },
+    "Wikipedia": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tavily": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize output": {
+      "main": [
+        [
+          {
+            "node": "Respond to Apple Shortcut",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Event": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Emails": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Contact Database": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Events": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5919d89e-280a-482c-b260-e6eebc4453db",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b0fad50c0335cf6684234dbcff1bce8aa61d64615c13128511e2c5480c24529f"
+  },
+  "id": "4B7TCIlDRA0seb3e",
+  "tags": []
+}
