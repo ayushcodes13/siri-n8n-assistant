@@ -11,7 +11,7 @@ This project fixes that by connecting **Siri Shortcuts** with **n8n** workflows 
 Instead of just listening, Siri now actually *does things*.  
 
 ## 🎥 Demo
-Watch the full demo here: [YouTube Link]  
+Watch the full demo here: [[YouTube Link]](https://youtu.be/TNvFyeE1ILY)  
 
 ## ⚙️ How It Works
 1. Siri Shortcuts trigger n8n webhooks.  
