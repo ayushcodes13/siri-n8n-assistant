@@ -12,7 +12,6 @@ Instead of just listening, Siri now actually *does things*.
 
 ## 🎥 Demo
 Watch the full demo here: [[YouTube Link]](https://youtu.be/TNvFyeE1ILY)  
-<iframe width="560" height="315" src="https://www.youtube.com/embed/TNvFyeE1ILY?si=sQs3OnWSbUctQ7S-" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 ## ⚙️ How It Works
 1. Siri Shortcuts trigger n8n webhooks.  
